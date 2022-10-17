@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
+    
+    <!-- Last Vue2, Vue3 uses different syntax -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -13,8 +16,6 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <!-- Last Vue2, Vue3 uses different syntax -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 
 
     <title>Hello, world!</title>
@@ -24,62 +25,88 @@
 
     
     <div id="app">
-        <script type="application/javascript">
-            var app = new Vue({
-                el: '#app',
-                data: {
-                    sitename: "coursework1",
-                    product: [{
-                        id: 1,
-                        title: "Math",
-                        location: "London",
-                        price: 100,
-                        spaces: 5
-                    }, {
-                        id: 2,
-                        title: "English",
-                        location: "London",
-                        price: 100,
-                        spaces: 5
-                    }, {
-                        id: 3,
-                        title: "Science",
-                        location: "London",
-                        price: 100,
-                        spaces: 5
-                    }, {
-                        id: 4,
-                        title: "Music",
-                        location: "London",
-                        price: 100,
-                        spaces: 5
-                    }, {
-                        id: 5,
-                        title: "Art",
-                        location: "London",
-                        price: 100,
-                        spaces: 5
-                    }],
-                    cart: []
-                }
-            });
-        </script>
-        <ul class="thumbnails">
-            <li v-for="product in product">
-                <div class="thumbnail">
-                <img data-src="holder.js/300x200" alt="">
-                    <div class="caption">
-                        <h3>{{product.title}}</h3>
-                        <p>{{product.location}}</p>
-                        <p>
-                            <a href="#" class="btn btn-primary" role="button" v-on:click="addToCart(product)">Add to Cart</a>
-                            <a href="#" class="btn btn-default" role="button" v-on:click="removeFromCart(product)">Remove from Cart</a>
-                        </p>
-                    </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h1>Products</h1>
+                    <ul class="list-group" v-for="(item, index) in product">
+                        <li class="list-group-item" :id="product_index" >
+                            {{item.name}} - {{item.price}} - {{item.availability}}
+                            <button class="btn btn-primary" @click="addToCart(index)">Add to cart</button>
+                        </li>
+                    </ul>
                 </div>
-            </li>
-        </ul>
+            </div>
+        </div>
     </div>
+    
+    <script type="application/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+/* Array for our products */
+                product: [
+                    {name: 'Math', price: 50, availability: 5, taken: 0},
+                    {name: 'English', price: 100, availability: 5, taken: 0},
+                    {name: 'History', price: 500, availability: 5, taken: 0},
+                    {name: 'Philosophy', price: 20, availability: 5, taken: 0}
+                ],
+/* Array for our cart where referenced items will be held */
+                cart: [],
+                total: 0
+            },
+            methods: {
+/* Adds a single itme to the cart */
+                addToCart: function (index) {
+                    if (this.product[index].availability > 0) {
+                        this.product[index].availability--;
+                        this.product[index].taken++;
+                        this.cart.push(this.product[index]);
+                        this.total += this.product[index].price;
+                    }
+                },
+/* Removes a single item from the cart and adds the availability back to the product list */
+                removeFromCart: function (index) {
+                    if (this.cart[index].taken > 0) {
+                        this.cart[index].taken--;
+                        this.cart[index].availability++;
+                        this.cart.splice(index, 1);
+                        this.total -= this.cart[index].price;
+                    }
+                },
+/* Clears up the cart completely */
+                clearCart: function () {
+                    this.cart = [];
+                    this.total = 0;
+                    for (var i = 0; i < this.product.length; i++) {
+                        this.product[i].availability = 5;
+                        this.product[i].taken = 0;
+                    }
+                },
+/* Clears the cart, prompts a message thanking for the purchase but does not return the availability to the items */
+                checkout: function () {
+                    alert("Thank you for your purchase!");
+                    this.clearCart();
+                },
+/* Adds up the price in the cart */
+                getCartTotal: function () {
+                    var total = 0;
+                    for (var i = 0; i < this.cart.length; i++) {
+                        total += this.cart[i].price;
+                    }
+                    return total;
+                },
+/* Takes the number of taken classes and returns the total price */
+                getCartCount: function () {
+                    var count = 0;
+                    for (var i = 0; i < this.cart.length; i++) {
+                        count += this.cart[i].taken;
+                    }
+                    return count;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 
