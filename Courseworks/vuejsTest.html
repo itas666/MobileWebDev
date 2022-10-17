@@ -25,17 +25,33 @@
 
     
     <div id="app">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h1>Products</h1>
-                    <ul class="list-group" v-for="(item, index) in product">
-                        <li class="list-group-item" :id="product_index" >
-                            {{item.name}} - {{item.price}} - {{item.availability}}
-                            <button class="btn btn-primary" @click="addToCart(index)">Add to cart</button>
-                        </li>
-                    </ul>
+        <!-- Vue for loop to get all items and print them -->
+        <div class="container" v-for="(item, index) in product">
+            <div class="row" v-if="index == 0 || index%2 == 0">
+                <div class="col-4">
+                    <img :src="item.image" alt="image" class="img-fluid">
+                    <h2>{{item.name}}</h2>
+                    <p>{{item.description}}</p>
+                    <p>{{item.price}}</p>
+                    <p>Availability: {{item.availability}}</p>
+                    <button class="btn btn-primary" @click="addToCart(index)">Add to cart</button>
                 </div>
+            </div>
+            
+            <div class="col-4" v-else >
+                <img :src="item.image" alt="image" class="img-fluid">
+                <h2>{{item.name}}</h2>
+                <p>{{item.description}}</p>
+                <p>{{item.price}}</p>
+                <p>Availability: {{item.availability}}</p>
+                <button class="btn btn-primary" @click="addToCart(index)">Add to cart</button>
+            </div>
+        </div>
+
+        <!-- checkout button -->
+        <div class="row">
+            <div class="col-4">
+                <button class="btn btn-primary" @click="checkout()">Checkout</button>
             </div>
         </div>
     </div>
@@ -46,10 +62,11 @@
             data: {
 /* Array for our products */
                 product: [
-                    {name: 'Math', price: 50, availability: 5, taken: 0},
-                    {name: 'English', price: 100, availability: 5, taken: 0},
-                    {name: 'History', price: 500, availability: 5, taken: 0},
-                    {name: 'Philosophy', price: 20, availability: 5, taken: 0}
+                    {name: 'Math', price: 50, availability: 5, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Math is a subject'},
+                    {name: 'English', price: 40, availability: 10, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'English is a subject'},
+                    {name: 'Science', price: 30, availability: 15, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Science is a subject'},
+                    {name: 'History', price: 20, availability: 20, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'History is a subject'},
+                    {name: 'Geography', price: 10, availability: 25, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Geography is a subject'}
                 ],
 /* Array for our cart where referenced items will be held */
                 cart: [],
@@ -63,6 +80,8 @@
                         this.product[index].taken++;
                         this.cart.push(this.product[index]);
                         this.total += this.product[index].price;
+                    }else{
+                        alert("Sorry, this item is out of stock");
                     }
                 },
 /* Removes a single item from the cart and adds the availability back to the product list */
@@ -85,8 +104,9 @@
                 },
 /* Clears the cart, prompts a message thanking for the purchase but does not return the availability to the items */
                 checkout: function () {
-                    alert("Thank you for your purchase!");
-                    this.clearCart();
+                    alert("Thank you for your purchase!" + "\n" + "Your total is: " + this.total);
+                    this.cart = [];
+                    this.total = 0;
                 },
 /* Adds up the price in the cart */
                 getCartTotal: function () {
