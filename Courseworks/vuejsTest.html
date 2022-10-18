@@ -24,7 +24,15 @@
     <h1>Hello, world!</h1>
 
     
-    <div id="app">
+    <div id="shop">
+        <div class="side">
+            <p>Sort by</p>
+            <button v-on:click="sortProducts('name')">Name</button>
+            <button v-on:click="sortProducts('price')">Price</button>
+            <p>Order</p>
+            <button v-on:click="orderProducts('asc')">Ascending</button>
+            <button v-on:click="orderProducts('desc')">Descending</button>
+        </div>
         <!-- Vue for loop to get all items and print them -->
         <div class="container" v-for="(item, index) in product">
             <div class="row" v-if="index == 0 || index%2 == 0">
@@ -55,10 +63,25 @@
             </div>
         </div>
     </div>
+
+
+
+    <div id="checkout" style="display: none;">
+        <div class="container">
+            <div class="row">
+                <div class="col-4">
+                    <h2>Checkout</h2>
+                    <p>Items in cart: {{cart.length}}</p>
+                    <p>Total: {{total}}</p>
+                    <button class="btn btn-primary" @click="goBack()">Go back</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script type="application/javascript">
-        var app = new Vue({
-            el: '#app',
+        var shopApp = new Vue({
+            el: '#shop',
             data: {
 /* Array for our products */
                 product: [
@@ -104,9 +127,8 @@
                 },
 /* Clears the cart, prompts a message thanking for the purchase but does not return the availability to the items */
                 checkout: function () {
-                    alert("Thank you for your purchase!" + "\n" + "Your total is: " + this.total);
-                    this.cart = [];
-                    this.total = 0;
+                    checkoutApp
+
                 },
 /* Adds up the price in the cart */
                 getCartTotal: function () {
@@ -123,6 +145,45 @@
                         count += this.cart[i].taken;
                     }
                     return count;
+                }
+            },
+            computed: {
+/* Sorts the products by name */
+                sortByName: function () {
+                    return this.product.sort(function (a, b) {
+                        return a.name > b.name;
+                    });
+                },
+/* Sorts the products by price */
+                sortByPrice: function () {
+                    return this.product.sort(function (a, b) {
+                        return a.price > b.price;
+                    });
+                },
+/* Sorts the products by availability */
+                sortByAvailability: function () {
+                    return this.product.sort(function (a, b) {
+                        return a.availability > b.availability;
+                    });
+                }
+            },
+            filters: {
+/* Formats the price to show a dollar sign and two decimal places */
+                currency: function (price) {
+                    return '$' + price.toFixed(2);
+                }
+            }
+        });
+        var checkoutApp = new Vue({
+            el: '#checkout',
+            data: {
+                cart: shopApp.cart,
+                total: shopApp.total
+            },
+            methods: {
+                goBack: function () {
+                    shopApp.cart = this.cart;
+                    shopApp.total = this.total;
                 }
             }
         });
