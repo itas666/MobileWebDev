@@ -35,9 +35,7 @@
                 </li>
                 
 <!-- sort by ascending or descending order -->
-
             </ul>
-        <div class="sidebar">
             <ul>
                 <li v-bind:class="selectedOrder === 'ascending' ? 'active' : 'inactive'" v-on:click="selectedOrder = 'ascending'">
                     Ascending
@@ -47,10 +45,10 @@
                 </li>
             </ul>
         </div>
-        </div>
-        <!-- main content -->
-        <!-- Vue for loop to get all items and print them -->
-        <div class="container" v-for="(item, index) in product">
+<!-- main content -->
+<!-- Vue for loop to get all products in our product array within vue and print them in the selected sort and selected order -->
+
+        <div class="container" v-for="(item, index) in sortedProducts">
             <div class="row" v-if="index == 0 || index%2 == 0">
                 <div class="col-4">
                     <img :src="item.image" alt="image" class="img-fluid">
@@ -73,6 +71,7 @@
                 <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
             </div>
         </div>
+
 
         <!-- checkout button -->
         <div class="row">
@@ -174,7 +173,11 @@
 /* Sorts the products depending on the selected sort */
                 sortedProducts: function () {
                     return this.product.sort((a, b) => {
-                        return a[this.selectedSort] > b[this.selectedSort];
+                        if (this.selectedOrder === 'ascending') {
+                            return a[this.selectedSort] > b[this.selectedSort] ? 1 : -1;
+                        } else {
+                            return a[this.selectedSort] < b[this.selectedSort] ? 1 : -1;
+                        }
                     });
                 }
             },
@@ -203,3 +206,7 @@
 </html>
 
                 
+
+<!--
+
+-->
