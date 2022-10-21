@@ -26,7 +26,7 @@
     
     <div id="shop">
         <!-- sidebar to select the sorting for the products -->
-        <div class="sidebar">
+        <div class="sidebar" v-show="shopStage">
             <h3>Sort by</h3>
             <ul>
 <!-- sort by different fields -->
@@ -45,10 +45,16 @@
                 </li>
             </ul>
         </div>
+        <!-- checkout button -->
+        <div class="row">
+            <div class="col-4">
+                <button class="btn btn-primary" @click="checkout()" v-show="shopStage">Checkout</button>
+            </div>
+        </div>
 <!-- main content -->
 <!-- Vue for loop to get all products in our product array within vue and print them in the selected sort and selected order -->
 
-        <div class="container" v-for="(item, index) in sortedProducts">
+        <div class="container" v-for="(item, index) in sortedProducts" v-show="shopStage">
             <div class="row" v-if="index == 0 || index%2 == 0">
                 <div class="col-4">
                     <img :src="item.image" alt="image" class="img-fluid">
@@ -69,28 +75,34 @@
                 <p>Availability: {{item.availability}}</p>
                 <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
                 <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
+                
+            
             </div>
+            
         </div>
 
 
-        <!-- checkout button -->
-        <div class="row">
-            <div class="col-4">
-                <button class="btn btn-primary" @click="checkout()">Checkout</button>
+<!-- 
+    checkout reads the array of products inside the cart, and prints them with the quantity, multiplying the product price with the quantity to get each sum of prices
+ -->
+        <div id="checkout" v-show="checkoutStage" >
+            <h1>Checkout</h1>
+            <div class="row" v-for="(item, index) in cart.product">
+                <div class="col-4">
+                    <img :src="item.image" alt="image" class="img-fluid">
+                    <h2>Subject: {{item.name}}</h2>
+                    <p>Description: {{item.description}}</p>
+                    <p>Price: {{item.price}}</p>
+                    <p>Quantity: {{cart.quantity[index]}}</p>
+                    <p>Sum: {{item.price * cart.quantity[index]}}</p>
+                </div>
             </div>
-        </div>
-    </div>
-
-
-
-    <div id="checkout" style="display: none;">
-        <div class="container">
+<!-- Total price and complete checkout process -->
             <div class="row">
                 <div class="col-4">
-                    <h2>Checkout</h2>
-                    <p>Items in cart: {{cart.length}}</p>
-                    <p>Total: {{total}}</p>
-                    <button class="btn btn-primary" @click="goBack()">Go back</button>
+                    <h2>Total price: {{cart.totalPrice}}</h2>
+                    <button class="btn btn-primary" @click="completeCheckout()">Complete checkout</button>
+                    <button class="btn btn-primary" @click="goBack()">Go Back</button>
                 </div>
             </div>
         </div>
@@ -102,52 +114,65 @@
             data: {
 /* Array for our products */
                 product: [
-                    {name: 'Math', price: 50, availability: 5, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Math is a subject'},
-                    {name: 'English', price: 40, availability: 10, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'English is a subject'},
+                    {name: 'Math', price: 50, availability: 5, image: 'https://www.mathsisfun.com/numbers/images/number-line-0-100.svg', description: 'Math is a subject'},
+                    {name: 'English', price: 40, availability: 10, image: 'https://www.englishclub.com/images/vocabulary/letters/letter-a.jpg', description: 'English is a subject'},
                     {name: 'Science', price: 30, availability: 15, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Science is a subject'},
-                    {name: 'History', price: 20, availability: 20, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'History is a subject'},
+                    {name: 'History', price: 20, availability: 20, image: 'https://www.history.com/.image/t_share/MTU3NjM4MjQwNjQ5MjQyNjQy/history-logo.jpg', description: 'History is a subject'},
                     {name: 'Geography', price: 10, availability: 25, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Geography is a subject'}
                 ],
 /* Array for our cart where referenced items will be held */
-                cart: [],
+                cart: {product: [], quantity: [], totalPrice: 0},
                 total: 0,
                 sorts: ['name', 'price', 'availability'],
                 selectedSort: 'name',
-                selectedOrder: 'ascending'
+                selectedOrder: 'ascending',
+                checkoutStage: false,
+                shopStage: true
             },
             methods: {
-/* Adds a single itme to the cart */
+/* Adds a single product to the cart, if it exists, it increases the quantity by one and does not push the item */
                 addToCart: function (index) {
-                    if (this.product[index].availability > 0) {
-                        this.product[index].availability--;
-                        this.product[index].taken++;
-                        this.cart.push(this.product[index]);
-                        this.total += this.product[index].price;
-                    }else{
-                        alert("Sorry, this item is out of stock");
+                    if (this.cart.product.indexOf(this.product[index]) == -1) {
+                        this.cart.product.push(this.product[index]);
+                        this.cart.quantity.push(1);
+                    } else {
+                        this.cart.quantity[this.cart.product.indexOf(this.product[index])] += 1;
                     }
+                    this.product[index].availability -= 1;
+                    this.cart.totalPrice += this.product[index].price;
                 },
-/* Removes a single item from the cart and adds the availability back to the product list */
+/* Removes a single item from the cart and adds the availability back to the product list,
+if it is the last product to be removed, also remove the entry from the carts products */
                 removeFromCart: function (index) {
-                    if (this.cart[index].taken > 0) {
-                        this.cart[index].taken--;
-                        this.cart[index].availability++;
-                        this.cart.splice(index, 1);
-                        this.total -= this.cart[index].price;
+                    var cartIndex = this.cart.product.indexOf(this.product[index]);
+                    this.cart.quantity[cartIndex] -= 1;
+                    this.product[index].availability += 1;
+                    this.cart.totalPrice -= this.product[index].price;
+                    if (this.cart.quantity[cartIndex] == 0) {
+                        this.cart.product.splice(cartIndex, 1);
+                        this.cart.quantity.splice(cartIndex, 1);
                     }
                 },
-/* Clears up the cart completely */
+/* Clears up the cart completely by removing one by one the taken products
+run through all cart and remove items while there is quantity */
                 clearCart: function () {
-                    this.cart = [];
-                    this.total = 0;
-                    for (var i = 0; i < this.product.length; i++) {
-                        this.product[i].availability = 5;
-                        this.product[i].taken = 0;
+                    for (var i = 0; i < this.cart.product.length; i++) {
+                        while(this.cart.quantity[i] > 0) {
+/* find the index of the product in the cart and remove it
+the removeFromCart takes the index of the product, not the index of the cart */
+                            this.removeFromCart(this.product.indexOf(this.cart.product[i]));
+                        }
                     }
                 },
 /* Clears the cart, prompts a message thanking for the purchase but does not return the availability to the items */
                 checkout: function () {
-                    checkoutApp
+                    this.checkoutStage = true;
+                    this.shopStage = false;
+                },
+                
+                goBack: function () {
+                    this.checkoutStage = false;
+                    this.shopStage = true;
                 },
 /* Adds up the price in the cart */
                 getCartTotal: function () {
@@ -167,10 +192,16 @@
                 },
                 canAddToCart: function (index) {
                     return this.product[index].availability > 0;
+                },
+                completeCheckout: function () {
+                    this.cart = {product: [], quantity: [], totalPrice: 0};
+                    alert('Thank you for your purchase!');
+                    this.goBack();
                 }
             },
             computed: {
-/* Sorts the products depending on the selected sort */
+/* Sorts the products depending on the selected sort
+Idea from: https://stackoverflow.com/questions/42883835/sort-an-array-in-vue-js */
                 sortedProducts: function () {
                     return this.product.sort((a, b) => {
                         if (this.selectedOrder === 'ascending') {
@@ -180,33 +211,8 @@
                         }
                     });
                 }
-            },
-            filters: {
-/* Formats the price to show a dollar sign and two decimal places */
-                currency: function (price) {
-                    return '$' + price.toFixed(2);
-                }
-            }
-        });
-        var checkoutApp = new Vue({
-            el: '#checkout',
-            data: {
-                cart: shopApp.cart,
-                total: shopApp.total
-            },
-            methods: {
-                goBack: function () {
-                    shopApp.cart = this.cart;
-                    shopApp.total = this.total;
-                }
             }
         });
     </script>
 </body>
 </html>
-
-                
-
-<!--
-
--->
