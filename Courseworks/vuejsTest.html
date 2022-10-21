@@ -18,41 +18,59 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
 
-    <title>Hello, world!</title>
+    <title>No</title>
 </head>
 <body>
     <h1>Hello, world!</h1>
 
     
     <div id="shop">
-        <div class="side">
-            <p>Sort by</p>
-            <button v-on:click="sortProducts('name')">Name</button>
-            <button v-on:click="sortProducts('price')">Price</button>
-            <p>Order</p>
-            <button v-on:click="orderProducts('asc')">Ascending</button>
-            <button v-on:click="orderProducts('desc')">Descending</button>
+        <!-- sidebar to select the sorting for the products -->
+        <div class="sidebar">
+            <h3>Sort by</h3>
+            <ul>
+<!-- sort by different fields -->
+                <li v-for="sort in sorts" v-bind:class="sort == selectedSort ? 'active' : 'inactive'" v-on:click="selectedSort = sort">
+                    {{ sort }} 
+                </li>
+                
+<!-- sort by ascending or descending order -->
+
+            </ul>
+        <div class="sidebar">
+            <ul>
+                <li v-bind:class="selectedOrder === 'ascending' ? 'active' : 'inactive'" v-on:click="selectedOrder = 'ascending'">
+                    Ascending
+                </li>
+                <li v-bind:class="selectedOrder === 'descending' ? 'active' : 'inactive'" v-on:click="selectedOrder = 'descending'">
+                    Descending
+                </li>
+            </ul>
         </div>
+        </div>
+        <!-- main content -->
         <!-- Vue for loop to get all items and print them -->
         <div class="container" v-for="(item, index) in product">
             <div class="row" v-if="index == 0 || index%2 == 0">
                 <div class="col-4">
                     <img :src="item.image" alt="image" class="img-fluid">
-                    <h2>{{item.name}}</h2>
-                    <p>{{item.description}}</p>
-                    <p>{{item.price}}</p>
+                    <h2>Subject: {{item.name}}</h2>
+                    <p>Description: {{item.description}}</p>
+                    <p>Price: {{item.price}}</p>
                     <p>Availability: {{item.availability}}</p>
-                    <button class="btn btn-primary" @click="addToCart(index)">Add to cart</button>
+                    <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
+                    <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
                 </div>
             </div>
             
             <div class="col-4" v-else >
                 <img :src="item.image" alt="image" class="img-fluid">
-                <h2>{{item.name}}</h2>
-                <p>{{item.description}}</p>
-                <p>{{item.price}}</p>
+                <h2>Subject: {{item.name}}</h2>
+                <p>Description: {{item.description}}</p>
+                <p>Price: {{item.price}}</p>
                 <p>Availability: {{item.availability}}</p>
-                <button class="btn btn-primary" @click="addToCart(index)">Add to cart</button>
+                <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
+                <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
             </div>
         </div>
 
@@ -85,15 +103,18 @@
             data: {
 /* Array for our products */
                 product: [
-                    {name: 'Math', price: 50, availability: 5, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Math is a subject'},
-                    {name: 'English', price: 40, availability: 10, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'English is a subject'},
-                    {name: 'Science', price: 30, availability: 15, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Science is a subject'},
-                    {name: 'History', price: 20, availability: 20, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'History is a subject'},
-                    {name: 'Geography', price: 10, availability: 25, canBuy: true, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Geography is a subject'}
+                    {name: 'Math', price: 50, availability: 5, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Math is a subject'},
+                    {name: 'English', price: 40, availability: 10, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'English is a subject'},
+                    {name: 'Science', price: 30, availability: 15, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Science is a subject'},
+                    {name: 'History', price: 20, availability: 20, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'History is a subject'},
+                    {name: 'Geography', price: 10, availability: 25, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Geography is a subject'}
                 ],
 /* Array for our cart where referenced items will be held */
                 cart: [],
-                total: 0
+                total: 0,
+                sorts: ['name', 'price', 'availability'],
+                selectedSort: 'name',
+                selectedOrder: 'ascending'
             },
             methods: {
 /* Adds a single itme to the cart */
@@ -128,7 +149,6 @@
 /* Clears the cart, prompts a message thanking for the purchase but does not return the availability to the items */
                 checkout: function () {
                     checkoutApp
-
                 },
 /* Adds up the price in the cart */
                 getCartTotal: function () {
@@ -145,25 +165,16 @@
                         count += this.cart[i].taken;
                     }
                     return count;
+                },
+                canAddToCart: function (index) {
+                    return this.product[index].availability > 0;
                 }
             },
             computed: {
-/* Sorts the products by name */
-                sortByName: function () {
-                    return this.product.sort(function (a, b) {
-                        return a.name > b.name;
-                    });
-                },
-/* Sorts the products by price */
-                sortByPrice: function () {
-                    return this.product.sort(function (a, b) {
-                        return a.price > b.price;
-                    });
-                },
-/* Sorts the products by availability */
-                sortByAvailability: function () {
-                    return this.product.sort(function (a, b) {
-                        return a.availability > b.availability;
+/* Sorts the products depending on the selected sort */
+                sortedProducts: function () {
+                    return this.product.sort((a, b) => {
+                        return a[this.selectedSort] > b[this.selectedSort];
                     });
                 }
             },
