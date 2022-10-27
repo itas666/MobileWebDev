@@ -62,6 +62,7 @@
                     <p>Description: {{item.description}}</p>
                     <p>Price: {{item.price}}</p>
                     <p>Availability: {{item.availability}}</p>
+                    <p>Location: {{item.location}}</p>
                     <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
                     <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
                 </div>
@@ -73,6 +74,7 @@
                 <p>Description: {{item.description}}</p>
                 <p>Price: {{item.price}}</p>
                 <p>Availability: {{item.availability}}</p>
+                <p>Location: {{item.location}}</p>
                 <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
                 <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
                 
