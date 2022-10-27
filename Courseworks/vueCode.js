@@ -3,7 +3,7 @@ var shopApp = new Vue({
     data: {
 /* Array for our products */
         product: [
-            {name: 'Math', price: 50, availability: 5, image: 'https://miro.medium.com/max/828/1*L76A5gL6176UbMgn7q4Ybg.jpeg', description: 'Math is a subject'}
+            {name: 'Math', price: 50, availability: 5, image: 'https://miro.medium.com/max/828/1*L76A5gL6176UbMgn7q4Ybg.jpeg', description: 'Math is a subject', location: 'London'}
         ],
 /* Array for our cart where referenced items will be held */
         cart: {product: [], quantity: [], totalPrice: 0},
