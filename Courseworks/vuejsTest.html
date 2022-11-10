@@ -17,14 +17,61 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
+    <style>
+        .active{
+            font-weight: bold;
+        }
+        li:hover{
+            font-weight: bold;
+            cursor: pointer;
+        }
+        div.mainBody{
+            display: grid;
+            grid-template-columns: 20% 80%;
+            grid-template-rows: 100%;
+            grid-template-areas: "sidebar contentContainer";
+        }
+        div.sidebar{
+            grid-area: sidebar;
+            background-color: #f1f1f1;
+            padding: 20px;
+        }
+        div.contentContainer{
+            grid-area: contentContainer;
+            background-color: #f1f1f1;
+            padding: 20px;
+        }
+        div.contentContainer{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+        div.container{
+            width: 500px;
+            background-color: #ffffff;
+            margin: 10px;
+            padding: 10px;
+        }
+        img{
+            height: 250px;
+        }
+        div.row div:first-of-type{
+            padding: auto;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+            width: 100%;
 
-    <title>No</title>
+        }
+    </style>
+
+    <title>CST3145</title>
 </head>
 <body>
-    <h1>Hello, world!</h1>
+    <h1>Quick lesson</h1>
 
     
-    <div id="shop">
+    <div id="shop" class="mainBody">
         <!-- sidebar to select the sorting for the products -->
         <div class="sidebar" v-show="shopStage">
             <h3>Sort by</h3>
@@ -44,41 +91,35 @@
                     Descending
                 </li>
             </ul>
-        </div>
-        <!-- checkout button -->
-        <div class="row">
-            <div class="col-4">
-                <button class="btn btn-primary" @click="checkout()" v-show="shopStage">Checkout</button>
+            
+            <!-- checkout button -->
+            <div class="row">
+                <div class="col-4">
+                    <button class="btn btn-primary" @click="checkout()" v-show="shopStage" v-if="canCheckout()">Checkout</button>
+                    <button class="btn btn-primary" @click="checkout()" v-show="shopStage" v-else disabled>Checkout</button>
+                </div>
             </div>
         </div>
 <!-- main content -->
 <!-- Vue for loop to get all products in our product array within vue and print them in the selected sort and selected order -->
-
-        <div class="container" v-for="(item, index) in sortedProducts" v-show="shopStage">
-            <div class="row" v-if="index == 0 || index%2 == 0">
-                <div class="col-4">
-                    <img :src="item.image" alt="image" class="img-fluid">
-                    <h2>Subject: {{item.name}}</h2>
-                    <p>Description: {{item.description}}</p>
-                    <p>Price: {{item.price}}</p>
-                    <p>Availability: {{item.availability}}</p>
-                    <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
-                    <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
+        <div class="contentContainer">
+            <div class="container" v-for="(item, index) in sortedProducts" v-show="shopStage">
+                <div class="row">
+                    <div>
+                        <img :src="item.image" alt="image">
+                    </div>
+                    <div class="col">
+                        <p><h3>Subject: {{item.name}}, {{item.location}}<span v-class='item.icon'></span></h3></p>
+                        <p>Price: {{item.price}}</p>
+                        <p>Availability: {{item.availability}}</p>
+                        <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
+                        <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
+                    </div>
+                    <div class="col">
+                        <p class="itemDescription"><h3>Description:</h3>{{item.description}}</p>
+                    </div>
                 </div>
             </div>
-            
-            <div class="col-4" v-else >
-                <img :src="item.image" alt="image" class="img-fluid">
-                <h2>Subject: {{item.name}}</h2>
-                <p>Description: {{item.description}}</p>
-                <p>Price: {{item.price}}</p>
-                <p>Availability: {{item.availability}}</p>
-                <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
-                <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
-                
-            
-            </div>
-            
         </div>
 
 
@@ -90,8 +131,8 @@
             <div class="row" v-for="(item, index) in cart.product">
                 <div class="col-4">
                     <img :src="item.image" alt="image" class="img-fluid">
-                    <h2>Subject: {{item.name}}</h2>
-                    <p>Description: {{item.description}}</p>
+                    <h2>Subject: {{item.name}}, {{item.location}} <span class="item.icon"></span></h2>
+                    <p class="itemDescription">Description: {{item.description}}</p>
                     <p>Price: {{item.price}}</p>
                     <p>Quantity: {{cart.quantity[index]}}</p>
                     <p>Sum: {{item.price * cart.quantity[index]}}</p>
@@ -101,118 +142,14 @@
             <div class="row">
                 <div class="col-4">
                     <h2>Total price: {{cart.totalPrice}}</h2>
-                    <button class="btn btn-primary" @click="completeCheckout()">Complete checkout</button>
+                    <button class="btn btn-primary" @click="completeCheckout()" v-if="canProceedCheckout()" >Complete checkout</button>
+                    <button class="btn btn-primary" @click="completeCheckout()" v-else disabled >Complete checkout</button>
                     <button class="btn btn-primary" @click="goBack()">Go Back</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <script type="application/javascript">
-        var shopApp = new Vue({
-            el: '#shop',
-            data: {
-/* Array for our products */
-                product: [
-                    {name: 'Math', price: 50, availability: 5, image: 'https://www.mathsisfun.com/numbers/images/number-line-0-100.svg', description: 'Math is a subject'},
-                    {name: 'English', price: 40, availability: 10, image: 'https://www.englishclub.com/images/vocabulary/letters/letter-a.jpg', description: 'English is a subject'},
-                    {name: 'Science', price: 30, availability: 15, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Science is a subject'},
-                    {name: 'History', price: 20, availability: 20, image: 'https://www.history.com/.image/t_share/MTU3NjM4MjQwNjQ5MjQyNjQy/history-logo.jpg', description: 'History is a subject'},
-                    {name: 'Geography', price: 10, availability: 25, image: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg', description: 'Geography is a subject'}
-                ],
-/* Array for our cart where referenced items will be held */
-                cart: {product: [], quantity: [], totalPrice: 0},
-                total: 0,
-                sorts: ['name', 'price', 'availability'],
-                selectedSort: 'name',
-                selectedOrder: 'ascending',
-                checkoutStage: false,
-                shopStage: true
-            },
-            methods: {
-/* Adds a single product to the cart, if it exists, it increases the quantity by one and does not push the item */
-                addToCart: function (index) {
-                    if (this.cart.product.indexOf(this.product[index]) == -1) {
-                        this.cart.product.push(this.product[index]);
-                        this.cart.quantity.push(1);
-                    } else {
-                        this.cart.quantity[this.cart.product.indexOf(this.product[index])] += 1;
-                    }
-                    this.product[index].availability -= 1;
-                    this.cart.totalPrice += this.product[index].price;
-                },
-/* Removes a single item from the cart and adds the availability back to the product list,
-if it is the last product to be removed, also remove the entry from the carts products */
-                removeFromCart: function (index) {
-                    var cartIndex = this.cart.product.indexOf(this.product[index]);
-                    this.cart.quantity[cartIndex] -= 1;
-                    this.product[index].availability += 1;
-                    this.cart.totalPrice -= this.product[index].price;
-                    if (this.cart.quantity[cartIndex] == 0) {
-                        this.cart.product.splice(cartIndex, 1);
-                        this.cart.quantity.splice(cartIndex, 1);
-                    }
-                },
-/* Clears up the cart completely by removing one by one the taken products
-run through all cart and remove items while there is quantity */
-                clearCart: function () {
-                    for (var i = 0; i < this.cart.product.length; i++) {
-                        while(this.cart.quantity[i] > 0) {
-/* find the index of the product in the cart and remove it
-the removeFromCart takes the index of the product, not the index of the cart */
-                            this.removeFromCart(this.product.indexOf(this.cart.product[i]));
-                        }
-                    }
-                },
-/* Clears the cart, prompts a message thanking for the purchase but does not return the availability to the items */
-                checkout: function () {
-                    this.checkoutStage = true;
-                    this.shopStage = false;
-                },
-                
-                goBack: function () {
-                    this.checkoutStage = false;
-                    this.shopStage = true;
-                },
-/* Adds up the price in the cart */
-                getCartTotal: function () {
-                    var total = 0;
-                    for (var i = 0; i < this.cart.length; i++) {
-                        total += this.cart[i].price;
-                    }
-                    return total;
-                },
-/* Takes the number of taken classes and returns the total price */
-                getCartCount: function () {
-                    var count = 0;
-                    for (var i = 0; i < this.cart.length; i++) {
-                        count += this.cart[i].taken;
-                    }
-                    return count;
-                },
-                canAddToCart: function (index) {
-                    return this.product[index].availability > 0;
-                },
-                completeCheckout: function () {
-                    this.cart = {product: [], quantity: [], totalPrice: 0};
-                    alert('Thank you for your purchase!');
-                    this.goBack();
-                }
-            },
-            computed: {
-/* Sorts the products depending on the selected sort
-Idea from: https://stackoverflow.com/questions/42883835/sort-an-array-in-vue-js */
-                sortedProducts: function () {
-                    return this.product.sort((a, b) => {
-                        if (this.selectedOrder === 'ascending') {
-                            return a[this.selectedSort] > b[this.selectedSort] ? 1 : -1;
-                        } else {
-                            return a[this.selectedSort] < b[this.selectedSort] ? 1 : -1;
-                        }
-                    });
-                }
-            }
-        });
-    </script>
+    <script type="application/javascript" src="./vueCode.js"></script>
 </body>
 </html>
