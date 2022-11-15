@@ -28,12 +28,17 @@
         div.mainBody{
             display: grid;
             grid-template-columns: 20% 80%;
-            grid-template-rows: 100%;
-            grid-template-areas: "sidebar contentContainer";
+            grid-template-rows: auto auto;
+            grid-template-areas:    "topBar     topBar"
+                                    "sidebar    contentContainer";
         }
         div.sidebar{
             grid-area: sidebar;
             background-color: #f1f1f1;
+            padding: 20px;
+        }
+        div.topBar{
+            grid-area: topBar;
             padding: 20px;
         }
         div.contentContainer{
@@ -68,10 +73,23 @@
     <title>CST3145</title>
 </head>
 <body>
-    <h1>Quick lesson</h1>
 
     
     <div id="shop" class="mainBody">
+        <div class="topBar">
+            <h1 style="float: left;">Quick lesson</h1>
+<!--
+    search bar for the vue product array; on tab key down, fill the text with the contents of the autocomplete computed function
+    Also disable the default behaviour of the tab key
+-->
+            <div class="searchBar" style="float: right;">
+                <input type="text" v-model="search" style="position: relative; top: 0px; right: 0px;" @keydown.tab.prevent="search = autocomplete" placeholder="Search for a product">
+<!-- greyed out text for the vue autocomplete function - greyed out text over search bar -->
+                <div style="position: relative; top: 0px; right: -4px; color: #4b4b4bb8;">
+                    {{autocomplete}}
+                </div>
+            </div>
+        </div>
         <!-- sidebar to select the sorting for the products -->
         <div class="sidebar" v-show="shopStage">
             <h3>Sort by</h3>
@@ -100,51 +118,68 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Total price and complete checkout process -->
+        <div class="sidebar" v-show="checkoutStage">
+            <div class="">
+                <h1>Checkout</h1>
+                <h2>Total price: {{cart.totalPrice}}</h2>
+                <!-- input texts for the checkout name and checkout phone in the vue application -->
+                <div class="form-group">
+                    <label for="checkoutName">Name</label>
+                    <input type="text" class="form-control" id="checkoutName" v-model="checkoutName">
+                    <label for="checkoutName">Phone</label>
+                    <input type="text" class="form-control" id="checkoutPhone" v-model="checkoutPhone">
+                </div>
+                <button class="btn btn-primary" @click="completeCheckout()" v-if="validateCheckout()" >Complete checkout</button>
+                <button class="btn btn-primary" @click="completeCheckout()" v-else disabled >Complete checkout</button>
+                <button class="btn btn-primary" @click="goBack()">Go Back</button>
+            </div>
+        </div>
 <!-- main content -->
+
 <!-- Vue for loop to get all products in our product array within vue and print them in the selected sort and selected order -->
         <div class="contentContainer">
-            <div class="container" v-for="(item, index) in sortedProducts" v-show="shopStage">
+            <div class="container" v-for="(item, index) in filteredProducts" v-show="shopStage">
                 <div class="row">
                     <div>
                         <img :src="item.image" alt="image">
                     </div>
                     <div class="col">
-                        <p><h3>Subject: {{item.name}}, {{item.location}}<span v-class='item.icon'></span></h3></p>
+                        <p><h3>Subject: {{item.name}}, {{item.location}}<!--span v-class='item.icon'></span--></h3></p>
                         <p>Price: {{item.price}}</p>
                         <p>Availability: {{item.availability}}</p>
                         <button class="btn btn-primary" @click="addToCart(index)" v-if="canAddToCart(index)" >Add to cart</button>
                         <button class="btn btn-primary" @click="addToCart(index)" v-else disabled >Out of stock</button>
+                        <button class="btn btn-primary" @click="">Remove from cart</button>
                     </div>
                     <div class="col">
                         <p class="itemDescription"><h3>Description:</h3>{{item.description}}</p>
                     </div>
                 </div>
             </div>
-        </div>
 
 
 <!-- 
     checkout reads the array of products inside the cart, and prints them with the quantity, multiplying the product price with the quantity to get each sum of prices
  -->
-        <div id="checkout" v-show="checkoutStage" >
-            <h1>Checkout</h1>
-            <div class="row" v-for="(item, index) in cart.product">
-                <div class="col-4">
-                    <img :src="item.image" alt="image" class="img-fluid">
-                    <h2>Subject: {{item.name}}, {{item.location}} <span class="item.icon"></span></h2>
-                    <p class="itemDescription">Description: {{item.description}}</p>
-                    <p>Price: {{item.price}}</p>
-                    <p>Quantity: {{cart.quantity[index]}}</p>
-                    <p>Sum: {{item.price * cart.quantity[index]}}</p>
-                </div>
-            </div>
-<!-- Total price and complete checkout process -->
-            <div class="row">
-                <div class="col-4">
-                    <h2>Total price: {{cart.totalPrice}}</h2>
-                    <button class="btn btn-primary" @click="completeCheckout()" v-if="canProceedCheckout()" >Complete checkout</button>
-                    <button class="btn btn-primary" @click="completeCheckout()" v-else disabled >Complete checkout</button>
-                    <button class="btn btn-primary" @click="goBack()">Go Back</button>
+            <div id="checkout" v-show="checkoutStage">
+                <div class="contentContainer">
+                    <div class="container" v-for="(item, index) in cart.product">
+                        <div class="row">
+                            <div>
+                                <img :src="item.image" alt="image">
+                            </div>
+                            <div class="col">
+                                <p><h3>Subject: {{item.name}}, {{item.location}}<span v-class='item.icon'></span></h3></p>
+                                <p>Quantity: {{cart.quantity[index]}}</p>
+                                <p>Total price: {{item.price * cart.quantity[index]}}</p>
+                            </div>
+                            <div class="col">
+                                <button class="btn btn-primary" @click="">Remove from cart</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
