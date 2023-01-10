@@ -1,65 +1,8 @@
-/*
-Display lessons
-A. There should be at least 10 lessons and each lesson has 5 spaces (1%). DONE
-B. Each lesson should have at least (2%): Subject, Location, Price, Space (how many spaces are left),
-    a Font Awesome icon, and an Image. 1/2
-C. The list of lessons must be stored as an array of JSON objects, one object for each lesson,
-    in a separate JavaScript file, such as lessons.js (1%). DONE
-D. v-for has to be used for the display of the lesson list (1%). DONE
-
-Sort
-A. The user can choose to sort the lessons by one of the following attributes: subject,
-    location, price, or availability (4%). DONE
-B. There must be an option to sort in ascending or descending order, regardless of
-    the attribute selected (1%). DONE
-
-Add to cart
-A. Each lesson must have an ’Add to Cart’ button (1%). DONE
-B. The button is only enabled when space is larger than 0 (1%). DONE
-C. Clicking the button once will add one space to the shopping cart, reducing
-    the remaining space by one (2%). DONE
-D. Once there is no more space, i.e. space = 0, the ’Add to cart’ button should
-    be disabled but still visible, i.e. clicking it will not further reduce
-    ‘space’ or add lessons to the cart (1%). DONE
-
-Shopping cart
-A. The shopping cart button should only be enabled after at least one lesson is
-    added to cart (1%). Done
-B. Clicking the shopping cart button should show the cart, and clicking the
-    button again goes back to the lesson page (1%). DONE
-C. The shopping cart should show all the lessons added (1%). DONE
-D. The user should be able to remove lessons from the shopping cart; the removed
-    lesson is added back to the lesson list (2%). DONE
-
-Checkout
-A. The checkout is part of the shopping cart page (1%). DONE
-B. A user must provide ‘Name’ and ‘Phone number’ before can check out (1%). DONE
-C. The ’Name’ must be letters only and the ’Phone’ must be numbers only; the check
-    must be done using JavaScript (suggestion: regular expressions) (1%). DONE
-D. The ’checkout’ button is only enabled after valid ’name’ and ’phone’ are provided (1%). DONE
-E. Clicking the ’checkout’ button should display a message confirming the
-    order has been submitted (1%). DONE
-
-Search
-[Intro] This is the challenge component of this coursework, and it is not expected that everyone can complete it. The solution is not covered in the Lecture or Lab, so you need to research it.
-[Feature Description]. The goal is to add a full-text search feature, so the user can search for a lesson without specifying which attribute to search on. For example, searching for ‘a’ should return all the lessons with ‘a’ in its title or location (‘price’ and ‘availability’ only have numbers so do not apply here).
-
-Related Solutions are marked as follows.
-
-[Base Points]
-Writing your own search function (4%): you will receive maximum 4 marks if you write your own search function, which again does not have to use Vue.js. DONE
-
-[Further Point]
-C. Search as you type (1%): in either case, you will get an additional 1 mark if the search supports ‘search as you type’, i.e. the search starts when the user types the first letter (displaying all the lessons containing that letter) and the result list is filtered as more search letters are entered (similar to Google search). DONE
-Maximum score5
-*/
-
-
 var shopApp = new Vue({
     el: '#shop',
     data: {
 /* Array for our products */
-        product: products,
+        product: [],
 /* Array for our cart where referenced products will be held */
         cart: {product: [], quantity: [], totalPrice: 0},
         total: 0,
@@ -195,5 +138,31 @@ when search has any data, return the first name of a product returned */
             }
             return '';
         }
-    }   
+    },
+    mounted: function () {
+        this.loading = true;
+        fetch('http://localhost:3000/lessons')
+        .then(response => response.json())
+        .then(data => {
+            this.product = data;
+            this.loading = false;
+        })
+        .catch(error => {
+            console.log(error);
+            this.loading = false;
+        });
+    },
+    function () {
+        this.loading = true;
+        fetch('http://localhost:3000/users')
+        .then(response => response.json())
+        .then(data => {
+            this.users = data;
+            this.loading = false;
+        })
+        .catch(error => {
+            console.log(error);
+            this.loading = false;
+        });
+    }
 });
